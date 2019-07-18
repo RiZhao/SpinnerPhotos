@@ -8,30 +8,20 @@
 
 import UIKit
 import Photos
-/*
- P2) Pick a number between 10-20(we'll call it X). Load X random images from the users camera roll into a queue at the bottom of the screen. When the user presses the button in the wheel, as the button rotates around the wheel, the background of the app should display the image in the queue which correlates with the current position of the button. So if X = 10, and if the button has a current value of 0 degrees, the first image in the queue should display as the background image. When the button value changes to 36, the background image should change to the second image in the queue. Every time the user presses the button, X should regenerate and a new selection of images should be loaded
- 
- */
+
 let numberOfImages = 20
 
 class MainViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    @IBOutlet weak var backgroundImageView: UIImageView!
 
     @IBOutlet weak var photosCollectionView: UICollectionView!{
         didSet{
             photosCollectionView.dataSource = self
             photosCollectionView.delegate = self
-            self.getImages()
         }
     }
     
-    
-    @IBOutlet weak var spinnerView: UIView!{
-        didSet{
-            self.drawBezierPath()
-        }
-    }
-
-    
+    @IBOutlet weak var spinnerView: UIView!
     @IBOutlet weak var spinnerButtonView: UIView!{
         didSet{
             let label = UILabel(frame: spinnerButtonView.bounds)
@@ -52,20 +42,33 @@ class MainViewController: UIViewController, UICollectionViewDelegate, UICollecti
         }
     }
     
-    var centerPoint: CGPoint! {
+    var centerPoint: CGPoint!{
         didSet{
+            //set the spinnerButtonView's center whenever the centerPoint is set
             self.spinnerButtonView.center = centerPoint
         }
     }
     
     var circle : Circle!
-    
     var currentDegree: Int!{
         didSet{
+            //update the label text whenever the current degree is set
             for view in self.spinnerButtonView.subviews{
                 if let label = view as? UILabel{
                     label.text = "\(String(currentDegree!))"
                 }
+            }
+            self.indexBasedOnDegree = self.currentDegree / (360 / numberOfImages)
+        }
+    }
+    
+    var indexBasedOnDegree: Int!{
+        didSet{
+            //check to see if the value of the index has changed because the value might not have changed if it has not changed a certain amount
+            if oldValue != indexBasedOnDegree{
+                let indexPath = IndexPath(row: indexBasedOnDegree, section: 0)
+                self.photosCollectionView.selectItem(at: indexPath, animated: true, scrollPosition: .centeredHorizontally)
+                self.setBackGroundImage(for: indexPath)
             }
         }
     }
@@ -74,7 +77,7 @@ class MainViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        self.requestPermissionAndSetup()
     }
     
     func drawBezierPath() {
@@ -90,7 +93,7 @@ class MainViewController: UIViewController, UICollectionViewDelegate, UICollecti
         //draw the path
         let shapeLayer = CAShapeLayer()
         shapeLayer.path = circlePath.cgPath
-        shapeLayer.fillColor = UIColor.blue.cgColor
+        shapeLayer.fillColor = UIColor.clear.cgColor
         shapeLayer.strokeColor = UIColor.green.cgColor
         shapeLayer.lineWidth = 3.0
         self.spinnerView.layer.insertSublayer(shapeLayer, below: self.spinnerButtonView.layer)
@@ -105,7 +108,7 @@ class MainViewController: UIViewController, UICollectionViewDelegate, UICollecti
     }
 
     
-    @objc func dragEmotionOnBezier(recognizer: UIPanGestureRecognizer) {
+    @objc func dragEmotionOnBezier(recognizer: UIPanGestureRecognizer){
         let point = recognizer.location(in: self.spinnerView)
         let circleData = self.circle.getPointInRelationToAngle(with: point)
         
@@ -158,21 +161,22 @@ extension MainViewController{
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "photocell", for: indexPath) as! PhotosCollectionViewCell
-        //let totalImages = images.count - 1
-        let asset = images[indexPath.row]
-        let manager = PHImageManager.default()
-        if cell.tag != 0 {
-            manager.cancelImageRequest(PHImageRequestID(cell.tag))
+        if images.count > indexPath.row{
+            let asset = images[indexPath.row]
+            let manager = PHImageManager.default()
+            if cell.tag != 0 {
+                manager.cancelImageRequest(PHImageRequestID(cell.tag))
+            }
+            cell.tag = Int(manager.requestImage(for: asset,
+                                                targetSize: CGSize(width: 120.0, height: 120.0),
+                                                contentMode: .aspectFill,
+                                                options: nil) { (result, _) in
+                                                    cell.photoView.image = result
+            })
         }
-        cell.tag = Int(manager.requestImage(for: asset,
-                                            targetSize: CGSize(width: 120.0, height: 120.0),
-                                            contentMode: .aspectFill,
-                                            options: nil) { (result, _) in
-                                                cell.photoView.image = result
-        })
         return cell
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let height = collectionView.frame.height * 0.9
         return CGSize(width: height, height: height)
@@ -193,16 +197,36 @@ extension MainViewController{
 
 // MARK: Photos Functions
 extension MainViewController{
-    func getImages() {
+    func requestPermissionAndSetup(){
+        PHPhotoLibrary.requestAuthorization { (status) in
+            switch status {
+            case .authorized:
+                print("Good to proceed")
+                DispatchQueue.main.async {
+                    self.getImages()
+                    self.drawBezierPath()
+                }
+            case .denied, .restricted:
+                print("Not allowed")
+            case .notDetermined:
+                print("Not determined yet")
+            @unknown default:
+                print("unknown")
+            }
+        }
+    }
+    
+    func getImages(){
+        //create a fetch option that returns the photos with the latest being first
         let options = PHFetchOptions()
         let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
         options.sortDescriptors = [sortDescriptor]
         let assets = PHAsset.fetchAssets(with: PHAssetMediaType.image, options: options)
+        //store the images in an array
         assets.enumerateObjects({ (object, count, stop) in
             self.images.append(object)
         })
         
-        // To show photos, I have taken a UICollectionView
         self.photosCollectionView.reloadData()
     }
     
@@ -210,6 +234,18 @@ extension MainViewController{
         self.images.removeFirst(numberOfImages)
         self.photosCollectionView.reloadData()
     }
+    
+    func setBackGroundImage(for indexPath: IndexPath){
+        guard images.count > indexPath.row else{
+            return
+        }
+        let asset = images[indexPath.row]
+        let manager = PHImageManager.default()
+        //request for image and set view's background image to result
+        manager.requestImage(for: asset,targetSize: CGSize(width: self.view.frame.width, height: self.view.frame.height), contentMode: .aspectFill, options: nil) { (result, _) in
+                self.backgroundImageView.image = result
+            }
+        }
 }
 
 extension Int{

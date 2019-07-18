@@ -151,7 +151,7 @@ class MainViewController: UIViewController, UICollectionViewDelegate, UICollecti
         animation.calculationMode = CAAnimationCalculationMode.paced
         animation.duration = percentageOfCircle * 1.5
         self.spinnerButtonView.layer.add(animation, forKey: nil)
-        self.centerPoint = self.circle.getPointWithDegree(randomDegree)
+        self.centerPoint = self.circle.getPointWithDegree(newDegree)
 
         CATransaction.commit()
     }
@@ -208,6 +208,7 @@ extension MainViewController{
                 print("Good to proceed")
                 DispatchQueue.main.async {
                     self.getImages()
+                    //self.prefetchData()
                     self.drawBezierPath()
                 }
             case .denied, .restricted:
@@ -247,13 +248,19 @@ extension MainViewController{
         let manager = PHImageManager.default()
         //request for image and set view's background image to result
         manager.requestImage(for: asset,targetSize: CGSize(width: self.view.frame.width, height: self.view.frame.height), contentMode: .aspectFill, options: nil) { (result, _) in
-                DispatchQueue.main.async {
-                    if let image = result{
-                        self.backgroundImageView.image = image
-                    }
+            DispatchQueue.main.async {
+                if let image = result{
+                    self.backgroundImageView.image = image
                 }
             }
         }
+    
+    }
+    
+//    func prefetchData(){
+//        let cachingManager = PHCachingImageManager()
+//        cachingManager.startCachingImages(for: self.images, targetSize: CGSize(width: self.view.frame.width, height: self.view.frame.height), contentMode: .aspectFill, options: nil)
+//    }
 }
 
 extension Int{

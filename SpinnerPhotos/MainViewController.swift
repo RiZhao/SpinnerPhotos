@@ -54,12 +54,8 @@ class MainViewController: UIViewController {
     @objc func dragEmotionOnBezier(recognizer: UIPanGestureRecognizer) {
         
         let point = recognizer.location(in: self.spinnerView)
-        let containedPoint : CGPoint = self.circle.setBoundary(for: point)
-        //print(containedPoint)
-        
-        // set the newLocation of the emojiview
-       // self.centerPoint = CGPoint(x: CGFloat(newX), y: CGFloat(newY))
-        self.centerPoint = containedPoint
+        let newPoint = self.circle.getPointInRelationToAngle(with: point)
+        self.centerPoint = newPoint
         
     }
     

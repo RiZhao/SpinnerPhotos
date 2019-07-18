@@ -117,9 +117,8 @@ class MainViewController: UIViewController, UICollectionViewDelegate, UICollecti
     }
 
     @objc func spinnerButtonTapped(recognizer: UITapGestureRecognizer) {
-        self.animateButtonRandomly()
         self.reloadNewPhotos()
-        
+        self.animateButtonRandomly()
     }
     
     func animateButtonRandomly(){
@@ -127,19 +126,24 @@ class MainViewController: UIViewController, UICollectionViewDelegate, UICollecti
         let radius = self.spinnerView.bounds.width * 0.4
         
         //create path with random degree from 0-359 so it won't go back to same location
-        let randomDegree = Int.random(in: (360 / numberOfImages)..<360)
-        let circlePath = UIBezierPath(arcCenter: origin, radius: radius, startAngle: CGFloat(currentDegree.degreeToRad()), endAngle:CGFloat(randomDegree.degreeToRad()), clockwise: true)
+        let randomDegree = Int.random(in: (360 / numberOfImages)..<(360 - (360 / numberOfImages)))
+        var newDegree = currentDegree + randomDegree
+        if newDegree > 360{
+            newDegree = newDegree - 360
+        }
+        
+        let circlePath = UIBezierPath(arcCenter: origin, radius: radius, startAngle: CGFloat(currentDegree.degreeToRad()), endAngle:CGFloat(newDegree.degreeToRad()), clockwise: true)
         
         //animate spinner button according to path
         CATransaction.begin()
         CATransaction.setCompletionBlock {
-            self.centerPoint = self.circle.getPointWithDegree(randomDegree)
-            self.currentDegree = randomDegree
+            self.centerPoint = self.circle.getPointWithDegree(newDegree)
+            self.currentDegree = newDegree
         }
         
         //calculate percentage of the circle the button needs to travel
         //use the percentage to apply to the animation duration so animation time is adjusted to match the distance being travelled
-        let percentageOfCircle = randomDegree > currentDegree ? Double(randomDegree - currentDegree) / 360.0 : Double(360 + randomDegree - currentDegree) / 360.0
+        let percentageOfCircle = Double(randomDegree) / 360.0
         
         let animation = CAKeyframeAnimation(keyPath: "position")
         animation.path = circlePath.cgPath
@@ -243,7 +247,11 @@ extension MainViewController{
         let manager = PHImageManager.default()
         //request for image and set view's background image to result
         manager.requestImage(for: asset,targetSize: CGSize(width: self.view.frame.width, height: self.view.frame.height), contentMode: .aspectFill, options: nil) { (result, _) in
-                self.backgroundImageView.image = result
+                DispatchQueue.main.async {
+                    if let image = result{
+                        self.backgroundImageView.image = image
+                    }
+                }
             }
         }
 }

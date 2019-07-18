@@ -127,7 +127,7 @@ class MainViewController: UIViewController, UICollectionViewDelegate, UICollecti
         let radius = self.spinnerView.bounds.width * 0.4
         
         //create path with random degree from 0-359 so it won't go back to same location
-        let randomDegree = Int.random(in: 0..<360)
+        let randomDegree = Int.random(in: (360 / numberOfImages)..<360)
         let circlePath = UIBezierPath(arcCenter: origin, radius: radius, startAngle: CGFloat(currentDegree.degreeToRad()), endAngle:CGFloat(randomDegree.degreeToRad()), clockwise: true)
         
         //animate spinner button according to path

@@ -23,7 +23,6 @@ struct Circle {
         let angle = atan2(v2.dy, v2.dx) - atan2(v1.dy, v1.dx)
         var deg = angle * CGFloat(180.0 / Double.pi)
         if deg < 0 { deg += 360.0 }
-        print(deg)
         let x = radius * cos(angle) + origin.x
         let y = radius * sin(angle) + origin.y
 

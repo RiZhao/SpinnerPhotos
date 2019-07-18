@@ -33,26 +33,40 @@
                                     <constraint firstAttribute="height" constant="350" id="dsP-g4-tCK"/>
                                 </constraints>
                             </view>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="AR0-EB-rtF">
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsVerticalScrollIndicator="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="AR0-EB-rtF">
                                 <rect key="frame" x="0.0" y="796" width="414" height="100"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="100" id="Bqh-NM-LJp"/>
                                 </constraints>
-                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="bFM-RS-Zxs">
+                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="bFM-RS-Zxs">
                                     <size key="itemSize" width="90" height="90"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="YrI-o4-Nve">
-                                        <rect key="frame" x="0.0" y="0.0" width="90" height="90"/>
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="photocell" id="YrI-o4-Nve" customClass="PhotosCollectionViewCell" customModule="SpinnerPhotos" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="5" width="90" height="90"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO">
                                             <rect key="frame" x="0.0" y="0.0" width="90" height="90"/>
                                             <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="VNR-ve-Fqg">
+                                                    <rect key="frame" x="0.0" y="0.0" width="90" height="90"/>
+                                                </imageView>
+                                            </subviews>
                                         </view>
+                                        <constraints>
+                                            <constraint firstAttribute="trailing" secondItem="VNR-ve-Fqg" secondAttribute="trailing" id="N7P-Su-lpb"/>
+                                            <constraint firstItem="VNR-ve-Fqg" firstAttribute="leading" secondItem="YrI-o4-Nve" secondAttribute="leading" id="pqe-Z8-diM"/>
+                                            <constraint firstItem="VNR-ve-Fqg" firstAttribute="top" secondItem="YrI-o4-Nve" secondAttribute="top" id="tv8-dr-J0R"/>
+                                            <constraint firstAttribute="bottom" secondItem="VNR-ve-Fqg" secondAttribute="bottom" id="wig-Az-rOv"/>
+                                        </constraints>
+                                        <connections>
+                                            <outlet property="photoView" destination="VNR-ve-Fqg" id="s6a-IN-efF"/>
+                                        </connections>
                                     </collectionViewCell>
                                 </cells>
                             </collectionView>
@@ -68,6 +82,7 @@
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <connections>
+                        <outlet property="photosCollectionView" destination="AR0-EB-rtF" id="twk-3c-Gqh"/>
                         <outlet property="spinnerButtonView" destination="gkQ-fC-ygK" id="xaC-Fz-QUM"/>
                         <outlet property="spinnerView" destination="ioL-ho-y3L" id="rmY-Yg-mhI"/>
                     </connections>

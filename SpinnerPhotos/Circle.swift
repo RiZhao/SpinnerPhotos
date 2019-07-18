@@ -11,10 +11,6 @@ import UIKit
 
 struct Circle {
     
-    var top : CGPoint
-    var right : CGPoint
-    var bottom : CGPoint
-    var left : CGPoint
     var origin : CGPoint
     var radius : CGFloat
     
@@ -22,7 +18,7 @@ struct Circle {
         //calculate angle between the bottom point and the currently selected point
         //use the radians and radius to calculate for new x, y
         //translate the x, y to the view's bounds by applying the origin
-        let v1 = CGVector(dx: right.x - origin.x, dy: right.y - origin.y)
+        let v1 = CGVector(dx: radius, dy: 0)
         let v2 = CGVector(dx: point.x - origin.x, dy: point.y - origin.y)
         let angle = atan2(v2.dy, v2.dx) - atan2(v1.dy, v1.dx)
         var deg = angle * CGFloat(180.0 / Double.pi)
